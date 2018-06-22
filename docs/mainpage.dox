@@ -1,0 +1,95 @@
+/**
+\mainpage The ces265 documentation
+
+\section intro_sec Introduction
+Welcome to the documentatation of ces265, a "High Efficiency Video Coding"
+(HEVC) software written in C++ with multi-threading support. This software
+compresses the raw video stream in YUV 4:2:0 planar format into HEVC 8.0
+compatible bitstream. Help is taken from HM-8.0, HM-9.2 
+(http://hevc.hhi.fraunhofer.de/) and x265 (https://code.google.com/p/x265/)
+softwares while writing this software. It is hoped that this software is useful
+but no guarantee of any sort is provided. The authors are not liable for any
+use or any damages caused by the use of this software.
+
+There are several things to consider before using this software. First, there is
+no difference between a slice and a frame. In fact, only one slice per frame is
+allowed. Secondly, the frame dimensions must be divisible by the CTU_WIDTH and
+CTU_HEIGHT pre-processor directives (see Defines.h). Moreover, the CTU_WIDTH and
+CTU_HEIGHT cannot be made larger than 32. Currently, only Intra-encoding is
+supported in this software. However, the software is still developed to support
+Inter-encoding. Multi-threading is done via pthreads. This software is
+written and tested in Visual Studio 2012, and for pthreads, pthread-win32
+(https://www.sourceware.org/pthreads-win32/) is used. Though the software should
+also run fine on linux based platforms without any problems. Only tile-based
+threads are supported till now. However, the code is written in a manner to
+extend the threading capabilities to GOP- and slice-level as well. No deblocking
+filter is present.
+
+\section soft_guide Software Guide
+User can provide input arguments via command line to this program. The command
+line arguments are given below with a brief detail. Note that the argument which
+is preceded by * is optional. The order in which the arguments appear is not
+important. For more information, see EncTop.cpp file.
+-#	"-i YUV420PFileName": The "-i" option is used to provide the yuv420 planar
+format file name to the program, which will be compressed by the program to
+generate the compressed bitstream as a file named "Video.h265".
+-#	"-w FrameWidth": The "-w" option specifies width of a frame in pixels.
+-#	"-h FrameHeight": The "-h" option specifies height of a frame in pixels.
+-#	*"-gop GopSize": The "-gop" option specifies the length of the GOP. The
+starting frame of a GOP is an Intra frame and all the rest are P-frames. Note
+that for the current implementation, GopSize must be equal to 1 as only Intra
+frame compression is supported.  The default value of GopSize is equal to 1.
+-#	"-Nframes NumFrames": The "-Nframes" option specifies the total number of
+frames to compress. 
+-#	*"-fps FramesPerSec": The "-fps" option is used to specify the frame-rate.
+Note that this is only used while computing the RD-parameter and has no impact
+on compression or timing efficiency. The default value of FramesPerSec is 1.
+-#	*"-QP QPValue": The "-QP" options specifies the QP of all the frames. The
+default value of QPValue is 32.
+-#	*"-Ngopth NumGopThreads": The "-Ngopth" option specifies the total number of
+GOP threads used. For the current implementation, NumGopThreads must be equal to
+1.
+-#	*"-Nsliceth NumSliceThreads": The "-Nsliceth" option specifies the total
+number of slice threads used. For the current implementation, NumSliceThreads
+must be equal to 1.
+-#	*"-Ntiles NumTilesPerFrame FrameWidthInTiles FrameHeightInTiles": The
+"-Ntiles" option specifies the total number of tiles that will reside in one
+full frame. Moreover, it also specifies the tile arrangement where
+FrameWidthInTiles argument gives the total tiles encompassing the width of the
+frame and FrameHeightInTiles argument does the same for the height of the frame.
+For example, "-Ntiles 20 5 4" will generate 20 tiles, 5 tile columns and 4 tile
+rows. For ces265, the sizes of the tiles are equal. Default value of
+NumTilesPerFrame is equal to 1. 
+-#	*"-Ntileth NumTileThreads": The "-Ntileth" option specifies the total number
+of tile threads that will be used. The default value of NumTileThreads is 1. 
+-#	*"--ver": The "--ver" option denotes verbosity and providing this argument
+to the program will produce verbose output. By default, verbosity is turned off.
+-#	*"--rec": The "--rec" option denotes reconstructed output generation. The
+name of the reconstructed yuv420 planar file is YUV420PFileName_HEVCRecon (see
+"-i" option). By default, no reconstructed output is generated.
+-#	*"--stat": The "--stat" option denotes writing output statistics in a
+"Statistics.txt" file. By default, no output statistics are written. 
+
+For an example, consider the following command line argument.
+
+-i foreman_cif.yuv -w 352 -h 288 -Nframes 50 -Ntiles 2 2 1 -Ntileth 2 -fps 30
+-\-rec -\-ver -QP 32 -\-stat
+
+This will encode 50 frames of "foreman_cif.yuv" yuv420p video sequence, with
+dimensions 352x288 at a QP of 32, to generate "Video.h265" in the same directory
+as the program. Total of 2 tiles per frame are used, with 2 threads. Output is
+verbose. Reconstructed output "foreman_cif_HEVCRecon.yuv" will be generated in
+the same directory as the source yuv file. "Statistics.txt" will be generated in
+the same directory as the program. The fps of 30 is used to generate RD
+statistics in the "RD.txt" file present in the same directory as the program
+(see EncMain.cpp file).
+
+\section credit Credits
+This software is written in "Chair for Embedded Systems"
+(CES, http://ces.itec.kit.edu), "Karlsruhe Institute of Technology" 
+(KIT, http://www.kit.edu), Karlsruhe, Germany. Main contributors of this work
+are:
+- Muhammad Usman Karim Khan (http://ces.itec.kit.edu/~khan/)
+- Muhammad Shafique (http://ces.itec.kit.edu/~shafique/)
+- Joerg Henkel (http://ces.itec.kit.edu/~henkel/)
+*/
